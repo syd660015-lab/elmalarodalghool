@@ -1,18 +1,23 @@
 {
-  "name": "عروضي---الذكاء-الاصطناعي-في-خدمة-الشعر-العربي",
+  "name": "digital-persona-analyst",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^1.40.0",
     "react": "^19.2.4",
-    "@google/genai": "^1.41.0",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "lucide-react": "^0.563.0",
+    "react-markdown": "^10.1.0",
+    "remark-math": "^6.0.0",
+    "rehype-katex": "^7.0.1",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

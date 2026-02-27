@@ -1,7 +1,5 @@
 {
-  "name": "عروضي - الذكاء الاصطناعي في خدمة الشعر العربي",
-  "description": "تطبيق متطور لتحليل وعلم العروض العربي، يستخدم الذكاء الاصطناعي لتشريح الأبيات، تعليم الأوزان، وتوليد الشعر بأسلوب تعليمي وتفاعلي.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "name": "Digital Persona Analyst",
+  "description": "An advanced psychological and digital statistical analyzer for social profiles, providing deep insights into digital behavior using Gemini AI.",
+  "requestFramePermissions": []
 }
