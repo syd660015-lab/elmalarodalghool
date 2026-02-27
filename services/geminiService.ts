@@ -3,7 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { ProsodyAnalysis, QuizQuestion, AssessmentFeedback } from "../types";
 
 // Helper to get AI instance with latest key
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || '' });
 
 const PROSODY_SYSTEM_INSTRUCTION = `
 أنت خبير في علم العروض العربي والأدب العربي. مهمتك هي تحليل الأبيات الشعرية بدقة تامة.
