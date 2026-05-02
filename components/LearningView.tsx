@@ -5,6 +5,7 @@ import AssessmentView from './AssessmentView';
 
 const LearningView: React.FC = () => {
   const [showAssessment, setShowAssessment] = useState(false);
+  const [assessmentType, setAssessmentType] = useState<'knowledge' | 'skill'>('knowledge');
   const [difficultyLevel, setDifficultyLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
 
   const arabicMeters = [
@@ -36,6 +37,7 @@ const LearningView: React.FC = () => {
         <AssessmentView 
           onClose={() => setShowAssessment(false)} 
           level={difficultyLevel === 'beginner' ? 'مبتدئ' : difficultyLevel === 'intermediate' ? 'متوسط' : 'متقدم'} 
+          initialType={assessmentType}
         />
       )}
 
@@ -66,7 +68,7 @@ const LearningView: React.FC = () => {
 
       <div className="grid grid-cols-2 gap-3">
         <button 
-          onClick={() => setShowAssessment(true)}
+          onClick={() => { setAssessmentType('knowledge'); setShowAssessment(true); }}
           className="bg-white p-5 rounded-3xl border border-emerald-100 flex flex-col items-center text-center group hover:bg-emerald-50 transition-all hover:shadow-lg active:scale-95"
         >
           <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🧠</span>
@@ -74,7 +76,7 @@ const LearningView: React.FC = () => {
           <span className="text-[9px] text-emerald-600/60 mt-1">قياس الفهم النظري</span>
         </button>
         <button 
-          onClick={() => setShowAssessment(true)}
+          onClick={() => { setAssessmentType('skill'); setShowAssessment(true); }}
           className="bg-white p-5 rounded-3xl border border-amber-100 flex flex-col items-center text-center group hover:bg-amber-50 transition-all hover:shadow-lg active:scale-95"
         >
           <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🎯</span>

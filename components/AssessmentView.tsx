@@ -6,17 +6,18 @@ import { QuizQuestion, AssessmentFeedback, AdvancedStats, SessionStat } from '..
 interface AssessmentViewProps {
   onClose: () => void;
   level: string;
+  initialType?: 'knowledge' | 'skill';
 }
 
 const STATS_KEY = 'arudi_assessment_stats';
 
-const AssessmentView: React.FC<AssessmentViewProps> = ({ onClose, level }) => {
+const AssessmentView: React.FC<AssessmentViewProps> = ({ onClose, level, initialType = 'knowledge' }) => {
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
   const [question, setQuestion] = useState<QuizQuestion | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<AssessmentFeedback | null>(null);
-  const [testType, setTestType] = useState<'knowledge' | 'skill'>('knowledge');
+  const [testType, setTestType] = useState<'knowledge' | 'skill'>(initialType);
   const [showHint, setShowHint] = useState(false);
   const [startTime, setStartTime] = useState<number>(0);
   const [showSummary, setShowSummary] = useState(false);
@@ -31,8 +32,24 @@ const AssessmentView: React.FC<AssessmentViewProps> = ({ onClose, level }) => {
 
   // Persisted Global Stats
   const [globalStats, setGlobalStats] = useState<AdvancedStats>(() => {
-    const saved = localStorage.getItem(STATS_KEY);
-    if (saved) return JSON.parse(saved);
+    try {
+      const saved = localStorage.getItem(STATS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          totalCorrect: parsed.totalCorrect ?? 0,
+          totalQuestions: parsed.totalQuestions ?? 0,
+          totalTime: parsed.totalTime ?? 0,
+          missedTypes: {
+            knowledge: parsed.missedTypes?.knowledge ?? 0,
+            skill: parsed.missedTypes?.skill ?? 0,
+          },
+          sessionHistory: Array.isArray(parsed.sessionHistory) ? parsed.sessionHistory : []
+        };
+      }
+    } catch (e) {
+      console.error("Failed to load stats from localStorage:", e);
+    }
     return {
       totalCorrect: 0,
       totalQuestions: 0,

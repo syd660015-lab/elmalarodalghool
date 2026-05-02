@@ -50,13 +50,18 @@ export const analyzeVerse = async (verse: string): Promise<ProsodyAnalysis> => {
     }
   });
 
-  return JSON.parse(response.text || '{}');
+  try {
+    return JSON.parse(response.text || '{}');
+  } catch (e) {
+    console.error("Failed to parse prosody analysis:", e);
+    throw new Error("فشل تحليل البيت عروضياً، حاول مرة أخرى.");
+  }
 };
 
 export const generatePoem = async (topic: string, meter: string, count: number): Promise<string[]> => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-3.1-pro-preview',
     contents: `اكتب ${count} أبيات من الشعر الفصيح عن "${topic}" على بحر "${meter}".`,
     config: {
       systemInstruction: "أنت شاعر مبدع متخصص في كتابة الشعر العمودي الملتزم بالوزن والقافية. تأكد أن عدد الأبيات مطابق تماماً للمطلوب.",
@@ -74,8 +79,13 @@ export const generatePoem = async (topic: string, meter: string, count: number):
     }
   });
 
-  const data = JSON.parse(response.text || '{"verses":[]}');
-  return data.verses;
+  try {
+    const data = JSON.parse(response.text || '{"verses":[]}');
+    return data.verses || [];
+  } catch (e) {
+    console.error("Failed to parse poem response:", e);
+    return [];
+  }
 };
 
 export interface CreativeSuggestions {
@@ -104,7 +114,12 @@ export const getSuggestions = async (topic: string): Promise<CreativeSuggestions
     }
   });
 
-  return JSON.parse(response.text || '{"themes":[], "imagery":[], "emotions":[]}');
+  try {
+    return JSON.parse(response.text || '{"themes":[], "imagery":[], "emotions":[]}');
+  } catch (e) {
+    console.error("Failed to parse suggestions:", e);
+    return { themes: [], imagery: [], emotions: [] };
+  }
 };
 
 export const generateQuizQuestion = async (type: 'knowledge' | 'skill', level: string): Promise<QuizQuestion> => {
@@ -137,7 +152,12 @@ export const generateQuizQuestion = async (type: 'knowledge' | 'skill', level: s
     }
   });
 
-  return JSON.parse(response.text || '{}');
+  try {
+    return JSON.parse(response.text || '{}');
+  } catch (e) {
+    console.error("Failed to parse quiz question:", e);
+    throw new Error("فشل توليد السؤال، حاول مرة أخرى.");
+  }
 };
 
 export const getSmartFeedback = async (question: string, userAnswer: string, correctAnswer: string): Promise<AssessmentFeedback> => {
@@ -166,5 +186,15 @@ export const getSmartFeedback = async (question: string, userAnswer: string, cor
     }
   });
 
-  return JSON.parse(response.text || '{}');
+  try {
+    return JSON.parse(response.text || '{}');
+  } catch (e) {
+    console.error("Failed to parse smart feedback:", e);
+    return {
+      isCorrect: userAnswer === correctAnswer,
+      score: userAnswer === correctAnswer ? 10 : 0,
+      message: userAnswer === correctAnswer ? "إجابة صحيحة!" : "إجابة خاطئة، حاول فهم القاعدة العروضية.",
+      guidance: `الإجابة الصحيحة كانت: ${correctAnswer}`
+    };
+  }
 };

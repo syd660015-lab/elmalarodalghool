@@ -35,6 +35,7 @@ const AnalysisView: React.FC = () => {
   }, [result]);
 
   const RhythmicChart = ({ scanning }: { scanning: string }) => {
+    // ... (blocks memo)
     const blocks = useMemo(() => {
       const cleaned = scanning.replace(/\s/g, '');
       return Array.from(cleaned).map((char, i) => ({
@@ -44,75 +45,94 @@ const AnalysisView: React.FC = () => {
       }));
     }, [scanning]);
 
+    // ... (totalWidth Height)
     const totalWidth = blocks.length * 35;
     const height = 100;
 
     return (
-      <div className="w-full bg-emerald-950/5 p-8 rounded-[2.5rem] border border-emerald-100/50 overflow-x-auto reveal shadow-inner">
-        <div className="flex items-center justify-between mb-6">
-          <span className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">نبض البحر العروضي</span>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-              <span className="text-[9px] text-gray-500 font-bold">مقطع ممدود</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-              <span className="text-[9px] text-gray-500 font-bold">مقطع قصير</span>
+      <div className="w-full space-y-8">
+        <div className="w-full bg-emerald-950/5 p-8 rounded-[2.5rem] border border-emerald-100/50 overflow-x-auto reveal shadow-inner">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">نبض البحر العروضي</span>
+            <div className="flex gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                <span className="text-[9px] text-gray-500 font-bold">مقطع ممدود</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span className="text-[9px] text-gray-400 font-bold">مقطع قصير</span>
+              </div>
             </div>
           </div>
+          
+          <div className="relative min-w-full">
+            <svg 
+              width={totalWidth} 
+              height={height} 
+              viewBox={`0 0 ${totalWidth} ${height}`}
+              className="mx-auto overflow-visible"
+            >
+              <path
+                d={`M 15,${height/2} ${blocks.map((_, i) => `L ${15 + i*35},${height/2}`).join(' ')}`}
+                stroke="currentColor"
+                className="text-emerald-100"
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray="4 4"
+              />
+              
+              {blocks.map((block, i) => {
+                const x = 15 + i * 35;
+                const barHeight = block.type === 'long' ? 40 : 20;
+                return (
+                  <g key={block.id} className="cursor-help group">
+                    <rect
+                      x={x - 10}
+                      y={height/2 - barHeight/2}
+                      width="20"
+                      height={barHeight}
+                      rx="10"
+                      className={`transition-all duration-700 ${block.type === 'long' ? 'fill-emerald-600' : 'fill-amber-400 opacity-60'}`}
+                    >
+                      <animate attributeName="height" from="0" to={barHeight} dur="1.2s" fill="freeze" />
+                    </rect>
+                    <text
+                      x={x}
+                      y={height - 5}
+                      textAnchor="middle"
+                      className="text-[10px] font-black fill-emerald-900/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      {block.original}
+                    </text>
+                    <circle
+                      cx={x}
+                      cy={height/2}
+                      r="3"
+                      className="fill-white shadow-sm"
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
         </div>
-        
-        <div className="relative min-w-full">
-          <svg 
-            width={totalWidth} 
-            height={height} 
-            viewBox={`0 0 ${totalWidth} ${height}`}
-            className="mx-auto overflow-visible"
-          >
-            <path
-              d={`M 15,${height/2} ${blocks.map((_, i) => `L ${15 + i*35},${height/2}`).join(' ')}`}
-              stroke="currentColor"
-              className="text-emerald-100"
-              strokeWidth="2"
-              fill="none"
-              strokeDasharray="4 4"
-            />
-            
-            {blocks.map((block, i) => {
-              const x = 15 + i * 35;
-              const barHeight = block.type === 'long' ? 40 : 20;
-              return (
-                <g key={block.id} className="cursor-help group">
-                  <rect
-                    x={x - 10}
-                    y={height/2 - barHeight/2}
-                    width="20"
-                    height={barHeight}
-                    rx="10"
-                    className={`transition-all duration-700 ${block.type === 'long' ? 'fill-emerald-600' : 'fill-amber-400 opacity-60'}`}
-                  >
-                    <animate attributeName="height" from="0" to={barHeight} dur="1.2s" fill="freeze" />
-                  </rect>
-                  <text
-                    x={x}
-                    y={height - 5}
-                    textAnchor="middle"
-                    className="text-[10px] font-black fill-emerald-900/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    {block.original}
-                  </text>
-                  <circle
-                    cx={x}
-                    cy={height/2}
-                    r="3"
-                    className="fill-white shadow-sm"
-                  />
-                </g>
-              );
-            })}
-          </svg>
-        </div>
+
+        {result?.syllables && result.syllables.length > 0 && (
+          <div className="bg-emerald-50/30 p-6 rounded-[2rem] border border-emerald-100 overflow-x-auto">
+            <h4 className="text-[10px] font-black text-emerald-800/40 uppercase mb-4 tracking-widest">تفكيك المقاطع الصوتية</h4>
+            <div className="flex gap-3 justify-center min-w-max">
+              {result.syllables.map((syl, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <div className="bg-white px-4 py-2 rounded-xl border border-emerald-100 shadow-sm text-sm font-bold text-emerald-950 poetry-font">
+                    {syl}
+                  </div>
+                  <div className={`w-1.5 h-1.5 rounded-full ${scanning.replace(/\s/g, '')[i] === '1' || scanning.replace(/\s/g, '')[i] === '—' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   };

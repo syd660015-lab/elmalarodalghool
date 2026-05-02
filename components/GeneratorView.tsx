@@ -28,7 +28,7 @@ const GeneratorView: React.FC = () => {
     try {
       const generatedVerses = await generatePoem(topic, meter, count);
       const newPoem: GeneratedPoem = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).slice(2, 11),
         topic,
         meter,
         verses: generatedVerses,
