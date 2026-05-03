@@ -25,6 +25,13 @@ export interface Lesson {
   icon: string;
 }
 
+export interface HistoryItem {
+  id: string;
+  timestamp: number;
+  type: 'analysis' | 'generation';
+  data: ProsodyAnalysis | PoetryGeneration;
+}
+
 export enum AppTab {
   ANALYSIS = 'analysis',
   LEARNING = 'learning',

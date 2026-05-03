@@ -1,26 +1,37 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { analyzeVerse } from '../services/geminiService';
+import { saveToHistory } from '../services/storageService';
 import { ProsodyAnalysis } from '../types';
 
 const AnalysisView: React.FC = () => {
   const [verse, setVerse] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ProsodyAnalysis | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!verse.trim()) return;
     setLoading(true);
     setResult(null);
+    setError(null);
     try {
       const analysis = await analyzeVerse(verse);
       setResult(analysis);
-    } catch (error) {
-      console.error(error);
-      alert('حدث خطأ أثناء تحليل البيت. حاول مرة أخرى.');
+      saveToHistory({ type: 'analysis', data: analysis });
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'حدث خطأ غير متوقع');
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyResult = () => {
+    if (!result) return;
+    const text = `تحليل عروضي لبيت: ${result.verse}\nالبحر: ${result.meter}\nالتقطيع: ${result.scanning}\nالتفاعيل: ${result.feet.join(' - ')}\n\nعروضـي - مختبر الشعر العربي الذكي`;
+    navigator.clipboard.writeText(text);
+    alert('تم نسخ التحليل بنجاح!');
   };
 
   // Re-run animation observer when result changes
@@ -183,6 +194,12 @@ const AnalysisView: React.FC = () => {
             )}
           </div>
         </button>
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+            <span>⚠️</span> {error}
+          </div>
+        )}
       </section>
 
       {result && (
@@ -196,6 +213,13 @@ const AnalysisView: React.FC = () => {
                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-inner ${result.isCorrect ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'} animate-pulse`}>
                   {result.isCorrect ? '✨' : '⚠️'}
                 </div>
+                <button 
+                  onClick={copyResult}
+                  className="p-3 bg-gray-50 text-gray-400 hover:text-emerald-600 rounded-xl transition-colors"
+                  title="نسخ النتيجة"
+                >
+                  📋
+                </button>
               </div>
               <h3 className="poetry-font text-3xl md:text-5xl leading-relaxed text-emerald-950 font-black italic">
                 {result.diacritizedVerse}

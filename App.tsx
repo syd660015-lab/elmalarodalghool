@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import AnalysisView from './components/AnalysisView';
 import LearningView from './components/LearningView';
 import GeneratorView from './components/GeneratorView';
+import HistoryView from './components/HistoryView';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.ANALYSIS);
@@ -24,13 +25,19 @@ const App: React.FC = () => {
       });
     }, observerOptions);
 
-    // Initial scan and observation
-    const elements = document.querySelectorAll('.reveal');
-    elements.forEach(el => observer.observe(el));
+    const checkReveal = () => {
+        const elements = document.querySelectorAll('.reveal');
+        elements.forEach(el => observer.observe(el));
+    };
 
-    // Cleanup and re-scan on tab change
+    checkReveal();
+    
+    // Polling slightly to ensure dynamically rendered components are observed
+    const interval = setInterval(checkReveal, 1000);
+
     return () => {
-      elements.forEach(el => observer.unobserve(el));
+      observer.disconnect();
+      clearInterval(interval);
     };
   }, [activeTab]);
 
@@ -54,13 +61,7 @@ const App: React.FC = () => {
         );
       case AppTab.HISTORY:
         return (
-          <div className="reveal flex flex-col items-center justify-center h-64 text-gray-400">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-5xl mb-6 shadow-inner animate-bounce-subtle">
-                📚
-            </div>
-            <p className="font-bold text-gray-500">سجل التحليلات فارغ</p>
-            <p className="text-xs mt-2 italic opacity-60">ابدأ بتشريح الأبيات عروضياً لتظهر هنا.</p>
-          </div>
+          <div className="reveal"><HistoryView /></div>
         );
       default:
         return <AnalysisView />;

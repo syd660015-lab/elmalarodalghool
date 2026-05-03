@@ -100,7 +100,7 @@ export const getSuggestions = async (topic: string): Promise<CreativeSuggestions
     model: 'gemini-3-flash-preview',
     contents: `بناءً على موضوع الشعر "${topic}"، قدم اقتراحات إبداعية ملهمة للشاعر.`,
     config: {
-      systemInstruction: "أنت مستشار إبداعي للشعراء. قدم اقتراحاتك في ثلاث فئات: ثيمات (themes)، صور بصرية (imagery)، وأحاسيس (emotions). اجعل الاقتراحات عبارات قصيرة جداً (كلمة أو كلمتين) وجذابة.",
+      systemInstruction: "أنت مستشار إبداعي للشعراء. قدم اقتراحاتك في ثلاث فئات: ثيمات (themes)، صور بصرية (imagery)، وأحاسيس (emotions). اجعل الاقتراحات عبارات شاعرية ملهمة ومفصلة قليلاً (من 3 إلى 5 كلمات) بدلاً من كلمات مفردة.",
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,

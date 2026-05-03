@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { generatePoem, getSuggestions, CreativeSuggestions } from '../services/geminiService';
+import { saveToHistory } from '../services/storageService';
 
 interface GeneratedPoem {
   id: string;
@@ -35,6 +36,16 @@ const GeneratorView: React.FC = () => {
         timestamp: new Date()
       };
       setHistory(prev => [newPoem, ...prev]);
+      
+      // Save to global storage
+      saveToHistory({
+        type: 'generation',
+        data: {
+          prompt: topic,
+          generatedVerses: generatedVerses,
+          meter
+        }
+      });
     } catch (error) {
       console.error(error);
       alert('حدث خطأ أثناء توليد الشعر.');
@@ -147,34 +158,60 @@ const GeneratorView: React.FC = () => {
                     <button onClick={() => setSuggestions(null)} className="text-[10px] text-gray-400 hover:text-red-500 transition-colors">مسح</button>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {suggestions.imagery.map((s, idx) => (
-                      <button
-                        key={`img-${idx}`}
-                        onClick={() => addSuggestion(s)}
-                        className="bg-sky-50 text-sky-700 text-xs px-3.5 py-2 rounded-full border border-sky-100 hover:bg-sky-100 hover:scale-105 transition-all flex items-center gap-2 shadow-sm"
-                      >
-                        <span className="text-sky-400">🖼️</span> {s}
-                      </button>
-                    ))}
-                    {suggestions.emotions.map((s, idx) => (
-                      <button
-                        key={`emo-${idx}`}
-                        onClick={() => addSuggestion(s)}
-                        className="bg-rose-50 text-rose-700 text-xs px-3.5 py-2 rounded-full border border-rose-100 hover:bg-rose-100 hover:scale-105 transition-all flex items-center gap-2 shadow-sm"
-                      >
-                        <span className="text-rose-400">❤️</span> {s}
-                      </button>
-                    ))}
-                    {suggestions.themes.map((s, idx) => (
-                      <button
-                        key={`theme-${idx}`}
-                        onClick={() => addSuggestion(s)}
-                        className="bg-emerald-50 text-emerald-700 text-xs px-3.5 py-2 rounded-full border border-emerald-100 hover:bg-emerald-100 hover:scale-105 transition-all flex items-center gap-2 shadow-sm"
-                      >
-                        <span className="text-emerald-400">📜</span> {s}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
+                      <h4 className="text-[9px] font-black text-emerald-800 mb-3 uppercase tracking-tighter flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                        ثيمات وعوالم
+                      </h4>
+                      <div className="flex flex-col gap-2">
+                        {suggestions.themes.map((s, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => addSuggestion(s)}
+                            className="bg-white text-emerald-700 text-[10px] p-2.5 rounded-xl border border-emerald-50 hover:border-emerald-500 hover:shadow-sm transition-all text-right font-bold"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100">
+                      <h4 className="text-[9px] font-black text-rose-800 mb-3 uppercase tracking-tighter flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                        صور وأخيلة
+                      </h4>
+                      <div className="flex flex-col gap-2">
+                        {suggestions.imagery.map((s, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => addSuggestion(s)}
+                            className="bg-white text-rose-700 text-[10px] p-2.5 rounded-xl border border-rose-50 hover:border-rose-500 hover:shadow-sm transition-all text-right font-bold"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                      <h4 className="text-[9px] font-black text-amber-800 mb-3 uppercase tracking-tighter flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        انفعالات وجدانية
+                      </h4>
+                      <div className="flex flex-col gap-2">
+                        {suggestions.emotions.map((s, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => addSuggestion(s)}
+                            className="bg-white text-amber-700 text-[10px] p-2.5 rounded-xl border border-amber-50 hover:border-amber-500 hover:shadow-sm transition-all text-right font-bold"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
