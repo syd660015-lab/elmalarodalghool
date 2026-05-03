@@ -208,7 +208,7 @@ const AnalysisView: React.FC = () => {
             <div className="text-center md:text-right space-y-5 reveal">
               <div className="flex items-center gap-3 justify-center md:justify-start">
                 <span className={`px-6 py-2 rounded-full text-[11px] font-black border-2 uppercase tracking-widest shadow-sm ${result.isCorrect ? 'bg-emerald-50 text-emerald-800 border-emerald-100' : 'bg-amber-50 text-amber-800 border-amber-100'}`}>
-                   بحر {result.meter}
+                   {result.meter.startsWith('بحر') ? result.meter : `بحر ${result.meter}`}
                 </span>
                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-inner ${result.isCorrect ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'} animate-pulse`}>
                   {result.isCorrect ? '✨' : '⚠️'}

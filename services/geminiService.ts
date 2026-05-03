@@ -45,7 +45,7 @@ export const analyzeVerse = async (verse: string): Promise<ProsodyAnalysis> => {
             items: { type: Type.STRING }
           }
         },
-        required: ["verse", "diacritizedVerse", "meter", "scanning", "feet", "explanation", "isCorrect"]
+        required: ["verse", "diacritizedVerse", "meter", "scanning", "feet", "explanation", "isCorrect", "syllables"]
       }
     }
   });
