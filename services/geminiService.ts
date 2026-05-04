@@ -1,9 +1,9 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { ProsodyAnalysis, QuizQuestion, AssessmentFeedback } from "../types";
 
 // Helper to get AI instance with latest key
-const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || '' });
+const getAI = () => new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY || '');
 
 const PROSODY_SYSTEM_INSTRUCTION = `
 أنت خبير في علم العروض العربي والأدب العربي. مهمتك هي تحليل الأبيات الشعرية بدقة تامة.
@@ -17,32 +17,34 @@ const PROSODY_SYSTEM_INSTRUCTION = `
 
 export const analyzeVerse = async (verse: string): Promise<ProsodyAnalysis> => {
   const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `حلل هذا البيت الشعري عروضياً بدقة: "${verse}"`,
-    config: {
-      systemInstruction: PROSODY_SYSTEM_INSTRUCTION,
+  const model = ai.getGenerativeModel({ 
+    model: 'gemini-2.0-flash',
+    systemInstruction: PROSODY_SYSTEM_INSTRUCTION 
+  });
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: `حلل هذا البيت الشعري عروضياً بدقة: "${verse}"` }] }],
+    generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          verse: { type: Type.STRING },
-          diacritizedVerse: { type: Type.STRING },
-          meter: { type: Type.STRING },
-          scanning: { type: Type.STRING },
+          verse: { type: SchemaType.STRING },
+          diacritizedVerse: { type: SchemaType.STRING },
+          meter: { type: SchemaType.STRING },
+          scanning: { type: SchemaType.STRING },
           feet: { 
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
           },
           syllables: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
           },
-          explanation: { type: Type.STRING },
-          isCorrect: { type: Type.BOOLEAN },
+          explanation: { type: SchemaType.STRING },
+          isCorrect: { type: SchemaType.BOOLEAN },
           errors: { 
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
           }
         },
         required: ["verse", "diacritizedVerse", "meter", "scanning", "feet", "explanation", "isCorrect", "syllables"]
@@ -51,7 +53,7 @@ export const analyzeVerse = async (verse: string): Promise<ProsodyAnalysis> => {
   });
 
   try {
-    return JSON.parse(response.text || '{}');
+    return JSON.parse(response.response.text() || '{}');
   } catch (e) {
     console.error("Failed to parse prosody analysis:", e);
     throw new Error("فشل تحليل البيت عروضياً، حاول مرة أخرى.");
@@ -60,18 +62,20 @@ export const analyzeVerse = async (verse: string): Promise<ProsodyAnalysis> => {
 
 export const generatePoem = async (topic: string, meter: string, count: number): Promise<string[]> => {
   const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3.1-pro-preview',
-    contents: `اكتب ${count} أبيات من الشعر الفصيح عن "${topic}" على بحر "${meter}".`,
-    config: {
-      systemInstruction: "أنت شاعر مبدع متخصص في كتابة الشعر العمودي الملتزم بالوزن والقافية. تأكد أن عدد الأبيات مطابق تماماً للمطلوب.",
+  const model = ai.getGenerativeModel({ 
+    model: 'gemini-2.0-flash',
+    systemInstruction: "أنت شاعر مبدع متخصص في كتابة الشعر العمودي الملتزم بالوزن والقافية. تأكد أن عدد الأبيات مطابق تماماً للمطلوب."
+  });
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: `اكتب ${count} أبيات من الشعر الفصيح عن "${topic}" على بحر "${meter}".` }] }],
+    generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
           verses: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
           }
         },
         required: ["verses"]
@@ -80,7 +84,7 @@ export const generatePoem = async (topic: string, meter: string, count: number):
   });
 
   try {
-    const data = JSON.parse(response.text || '{"verses":[]}');
+    const data = JSON.parse(response.response.text() || '{"verses":[]}');
     return data.verses || [];
   } catch (e) {
     console.error("Failed to parse poem response:", e);
@@ -96,18 +100,20 @@ export interface CreativeSuggestions {
 
 export const getSuggestions = async (topic: string): Promise<CreativeSuggestions> => {
   const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `بناءً على موضوع الشعر "${topic}"، قدم اقتراحات إبداعية ملهمة للشاعر.`,
-    config: {
-      systemInstruction: "أنت مستشار إبداعي للشعراء. قدم اقتراحاتك في ثلاث فئات: ثيمات (themes)، صور بصرية (imagery)، وأحاسيس (emotions). اجعل الاقتراحات عبارات شاعرية ملهمة ومفصلة قليلاً (من 3 إلى 5 كلمات) بدلاً من كلمات مفردة.",
+  const model = ai.getGenerativeModel({ 
+    model: 'gemini-2.0-flash',
+    systemInstruction: "أنت مستشار إبداعي للشعراء. قدم اقتراحاتك في ثلاث فئات: ثيمات (themes)، صور بصرية (imagery)، وأحاسيس (emotions). اجعل الاقتراحات عبارات شاعرية ملهمة ومفصلة قليلاً (من 3 إلى 5 كلمات) بدلاً من كلمات مفردة."
+  });
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: `بناءً على موضوع الشعر "${topic}"، قدم اقتراحات إبداعية ملهمة للشاعر.` }] }],
+    generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          themes: { type: Type.ARRAY, items: { type: Type.STRING } },
-          imagery: { type: Type.ARRAY, items: { type: Type.STRING } },
-          emotions: { type: Type.ARRAY, items: { type: Type.STRING } }
+          themes: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          imagery: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          emotions: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
         },
         required: ["themes", "imagery", "emotions"]
       }
@@ -115,7 +121,7 @@ export const getSuggestions = async (topic: string): Promise<CreativeSuggestions
   });
 
   try {
-    return JSON.parse(response.text || '{"themes":[], "imagery":[], "emotions":[]}');
+    return JSON.parse(response.response.text() || '{"themes":[], "imagery":[], "emotions":[]}');
   } catch (e) {
     console.error("Failed to parse suggestions:", e);
     return { themes: [], imagery: [], emotions: [] };
@@ -128,24 +134,26 @@ export const generateQuizQuestion = async (type: 'knowledge' | 'skill', level: s
     ? `أنشئ سؤالاً معرفياً (اختيار من متعدد) حول قواعد علم العروض العربي لمستوى ${level}.`
     : `أنشئ سؤالاً مهارياً يتطلب تحديد البحر الشعري أو التفعيلات لبيت شعري لمستوى ${level}.`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: {
-      systemInstruction: `أنت معلم خبير في علم العروض. أنشئ أسئلة دقيقة وجذابة تعليمياً. 
+  const model = ai.getGenerativeModel({ 
+    model: 'gemini-2.0-flash',
+    systemInstruction: `أنت معلم خبير في علم العروض. أنشئ أسئلة دقيقة وجذابة تعليمياً. 
       يجب أن يحتوي كل سؤال على حقل "hint" (تلميحة) يساعد الطالب على التفكير في الإجابة دون إعطائها له مباشرة. 
-      اجعل التلميحة تركز على القاعدة العروضية أو مفتاح الحل.`,
+      اجعل التلميحة تركز على القاعدة العروضية أو مفتاح الحل.`
+  });
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING },
-          question: { type: Type.STRING },
-          options: { type: Type.ARRAY, items: { type: Type.STRING } },
-          correctAnswer: { type: Type.STRING },
-          explanation: { type: Type.STRING },
-          hint: { type: Type.STRING }
+          id: { type: SchemaType.STRING },
+          type: { type: SchemaType.STRING },
+          question: { type: SchemaType.STRING },
+          options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          correctAnswer: { type: SchemaType.STRING },
+          explanation: { type: SchemaType.STRING },
+          hint: { type: SchemaType.STRING }
         },
         required: ["id", "type", "question", "correctAnswer", "explanation", "hint"]
       }
@@ -153,7 +161,7 @@ export const generateQuizQuestion = async (type: 'knowledge' | 'skill', level: s
   });
 
   try {
-    return JSON.parse(response.text || '{}');
+    return JSON.parse(response.response.text() || '{}');
   } catch (e) {
     console.error("Failed to parse quiz question:", e);
     throw new Error("فشل توليد السؤال، حاول مرة أخرى.");
@@ -162,24 +170,26 @@ export const generateQuizQuestion = async (type: 'knowledge' | 'skill', level: s
 
 export const getSmartFeedback = async (question: string, userAnswer: string, correctAnswer: string): Promise<AssessmentFeedback> => {
   const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `السؤال: ${question}\nإجابة المستخدم: ${userAnswer}\nالإجابة الصحيحة: ${correctAnswer}\n\nحلل الخطأ بدقة عروضية.`,
-    config: {
-      systemInstruction: `أنت معلم عروض يقدم تغذية راجعة ذكية ومفصلة. 
+  const model = ai.getGenerativeModel({ 
+    model: 'gemini-2.0-flash',
+    systemInstruction: `أنت معلم عروض يقدم تغذية راجعة ذكية ومفصلة. 
       يجب أن تتضمن الإجابة:
       1. رسالة مشجعة (message).
       2. شرح تفصيلي للقاعدة العروضية المتعلقة بالسؤال (guidance).
       3. درجة من 10 (score).
-      4. توضيح لماذا كانت الإجابة الصحيحة هي الخيار الأمثل.`,
+      4. توضيح لماذا كانت الإجابة الصحيحة هي الخيار الأمثل.`
+  });
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: `السؤال: ${question}\nإجابة المستخدم: ${userAnswer}\nالإجابة الصحيحة: ${correctAnswer}\n\nحلل الخطأ بدقة عروضية.` }] }],
+    generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          isCorrect: { type: Type.BOOLEAN },
-          score: { type: Type.NUMBER },
-          message: { type: Type.STRING },
-          guidance: { type: Type.STRING }
+          isCorrect: { type: SchemaType.BOOLEAN },
+          score: { type: SchemaType.NUMBER },
+          message: { type: SchemaType.STRING },
+          guidance: { type: SchemaType.STRING }
         },
         required: ["isCorrect", "score", "message", "guidance"]
       }
@@ -187,7 +197,7 @@ export const getSmartFeedback = async (question: string, userAnswer: string, cor
   });
 
   try {
-    return JSON.parse(response.text || '{}');
+    return JSON.parse(response.response.text() || '{}');
   } catch (e) {
     console.error("Failed to parse smart feedback:", e);
     return {
