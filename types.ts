@@ -35,6 +35,7 @@ export interface HistoryItem {
 export enum AppTab {
   ANALYSIS = 'analysis',
   LEARNING = 'learning',
+  ASSESSMENT = 'assessment',
   GENERATOR = 'generator',
   HISTORY = 'history'
 }

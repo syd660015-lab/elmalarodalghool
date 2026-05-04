@@ -30,6 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
   const tabs = [
     { id: AppTab.ANALYSIS, label: 'محلل الأوزان', icon: '⚖️' },
     { id: AppTab.LEARNING, label: 'أكاديمية العروض', icon: '🎓' },
+    { id: AppTab.ASSESSMENT, label: 'الاختبار الذكي', icon: '🎯' },
     { id: AppTab.GENERATOR, label: 'مولد الشعر', icon: '✍️' },
     { id: AppTab.HISTORY, label: 'سجلي', icon: '📚' }
   ];

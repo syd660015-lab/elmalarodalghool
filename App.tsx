@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import AnalysisView from './components/AnalysisView';
 import LearningView from './components/LearningView';
 import GeneratorView from './components/GeneratorView';
+import AssessmentView from './components/AssessmentView';
 import HistoryView from './components/HistoryView';
 
 const App: React.FC = () => {
@@ -53,6 +54,15 @@ const App: React.FC = () => {
         return (
           <div className="space-y-10">
              <div className="reveal"><LearningView /></div>
+          </div>
+        );
+      case AppTab.ASSESSMENT:
+        return (
+          <div className="reveal">
+            <AssessmentView 
+              onClose={() => setActiveTab(AppTab.LEARNING)} 
+              level="متوسط" 
+            />
           </div>
         );
       case AppTab.GENERATOR:
