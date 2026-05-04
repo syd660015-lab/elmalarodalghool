@@ -2,6 +2,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateQuizQuestion, getSmartFeedback } from '../services/geminiService';
 import { QuizQuestion, AssessmentFeedback, AdvancedStats, SessionStat } from '../types';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
+import { motion } from 'motion/react';
+import { TrendingUp, Clock, Target, AlertTriangle } from 'lucide-react';
 
 interface AssessmentViewProps {
   onClose: () => void;
@@ -149,18 +160,48 @@ const AssessmentView: React.FC<AssessmentViewProps> = ({ onClose, level, initial
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center">
-              <span className="block text-[10px] font-black text-emerald-500 uppercase mb-1">الدقة الكلية</span>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center relative overflow-hidden group"
+            >
+              <div className="absolute -top-2 -right-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Target className="w-16 h-16" />
+              </div>
+              <span className="block text-[10px] font-black text-emerald-500 uppercase mb-1 flex items-center justify-center gap-1">
+                <Target className="w-3 h-3" />
+                الدقة الكلية
+              </span>
               <span className="text-3xl font-black">{accuracy}%</span>
-            </div>
-            <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center">
-              <span className="block text-[10px] font-black text-amber-400 uppercase mb-1">متوسط الوقت</span>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center relative overflow-hidden group"
+            >
+              <div className="absolute -top-2 -right-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Clock className="w-16 h-16" />
+              </div>
+              <span className="block text-[10px] font-black text-amber-400 uppercase mb-1 flex items-center justify-center gap-1">
+                <Clock className="w-3 h-3" />
+                متوسط الوقت
+              </span>
               <span className="text-3xl font-black">{avgSessionTime}ث</span>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 space-y-6">
-            <h3 className="text-xs font-black text-emerald-500 uppercase tracking-widest">تحليل نقاط الضعف</h3>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 space-y-6"
+          >
+            <h3 className="text-xs font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              تحليل نقاط الضعف
+            </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-bold">المعارف العروضية</span>
@@ -183,25 +224,74 @@ const AssessmentView: React.FC<AssessmentViewProps> = ({ onClose, level, initial
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {globalStats.sessionHistory.length > 1 && (
-            <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10">
-              <h3 className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-6">اتجاه الأداء (آخر 10 جلسات)</h3>
-              <div className="flex items-end justify-between h-24 gap-1">
-                {globalStats.sessionHistory.map((s, i) => (
-                  <div 
-                    key={i}
-                    className="flex-1 bg-emerald-500/20 rounded-t-lg relative group transition-all hover:bg-emerald-500/40"
-                    style={{ height: `${(s.correct / s.total) * 100}%` }}
-                  >
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-black opacity-0 group-hover:opacity-100">
-                      {Math.round((s.correct / s.total) * 100)}%
-                    </div>
-                  </div>
-                ))}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 space-y-6"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  اتجاه الأداء (آخر 10 جلسات)
+                </h3>
               </div>
-            </div>
+              
+              <div className="h-48 w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={globalStats.sessionHistory.map((s, i) => ({
+                      name: i + 1,
+                      accuracy: Math.round((s.correct / s.total) * 100),
+                      time: s.avgTime.toFixed(1)
+                    }))}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#ffffff30" 
+                      fontSize={10} 
+                      tickLine={false} 
+                      axisLine={false}
+                    />
+                    <YAxis 
+                      stroke="#ffffff30" 
+                      fontSize={10} 
+                      tickLine={false} 
+                      axisLine={false} 
+                      domain={[0, 100]}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#064e3b', border: 'none', borderRadius: '12px', fontSize: '10px' }}
+                      itemStyle={{ color: '#10b981' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="accuracy" 
+                      stroke="#10b981" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorAcc)" 
+                      animationDuration={1500}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              
+              <p className="text-[9px] text-emerald-100/30 text-center italic">
+                يوضح الرسم البياني نسبة الدقة المئوية لكل جلسة من أصل آخر 10 جلسات
+              </p>
+            </motion.div>
           )}
 
           <div className="flex flex-col gap-3">

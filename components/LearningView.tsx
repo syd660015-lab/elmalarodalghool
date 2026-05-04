@@ -17,10 +17,15 @@ const LearningView: React.FC = () => {
   const lessons: Lesson[] = [
     { id: '1', title: 'أساسيات الكتابة العروضية', description: 'ما ينطق يكتب وما لا ينطق لا يكتب.', difficulty: 'beginner', icon: '📝' },
     { id: '2', title: 'مفهوم السبب والوتد', description: 'بناء اللبنات الأولى للتفعيلة الشعرية.', difficulty: 'beginner', icon: '🧱' },
+    { id: '7', title: 'بحر الرجز', description: 'بحر المختبرات العلمية: مستفعلن مستفعلن مستفعلن.', difficulty: 'beginner', icon: '🧪' },
     { id: '3', title: 'البحر الطويل', description: 'دراسة تفعيلات فعولن مفاعيلن وتفرعاتها.', difficulty: 'intermediate', icon: '🌊' },
     { id: '4', title: 'البحر البسيط', description: 'مستفعلن فاعلن مستفعلن فاعلن.', difficulty: 'intermediate', icon: '⚖️' },
+    { id: '8', title: 'بحر الوافر', description: 'بحر الرقة والعاطفة: مفاعلتن مفاعلتن فعولن.', difficulty: 'intermediate', icon: '💖' },
+    { id: '9', title: 'بحر الكامل', description: 'البحر الجزل: متفاعلن متفاعلن متفاعلن.', difficulty: 'intermediate', icon: '🏛️' },
+    { id: '10', title: 'بحر الخفيف', description: 'بحر الرشاقة: فاعلاتن مستفعلن فاعلاتن.', difficulty: 'intermediate', icon: '🕊️' },
     { id: '5', title: 'الزحافات والعلل', description: 'التغييرات التي تطرأ على تفعيلات البحور.', difficulty: 'advanced', icon: '⚡' },
     { id: '6', title: 'الضرورات الشعرية', description: 'ما يجوز للشاعر ولا يجوز لغيره.', difficulty: 'advanced', icon: '📜' },
+    { id: '11', title: 'المعاقبة والمراقبة', description: 'قواعد تجاور الزحافات في التفعيلات المتجاورة.', difficulty: 'advanced', icon: '⛓️' },
   ];
 
   const filteredLessons = lessons.filter(l => l.difficulty === difficultyLevel);
